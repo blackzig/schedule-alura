@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".FormStudentActivity">
+
+    <item android:id="@+id/ok_add_student"
+        android:title="OK"
+        android:icon="@drawable/ok"
+        app:showAsAction="always"/>
+
+</menu>
