@@ -1,10 +1,12 @@
 package br.com.micheladrianomedeiros.agenda.model;
 
+import java.io.Serializable;
+
 /**
  * Created by Michel on 26/11/2017.
  */
 
-public class Student {
+public class Student implements Serializable{
 
     private Long id;
     private String name;
@@ -59,5 +61,10 @@ public class Student {
 
     public void setAssessment(Double assessment) {
         this.assessment = assessment;
+    }
+
+    @Override
+    public String toString() {
+        return getId() + " - " + getName();
     }
 }
