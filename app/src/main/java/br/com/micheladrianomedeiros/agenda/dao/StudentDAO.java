@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,26 +20,33 @@ public class StudentDAO extends SQLiteOpenHelper{
 
 
     public StudentDAO(Context context) {
-        super(context, "Schedule", null, 1);
+        super(context, "Schedule", null, 2);
     }
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
+        Log.i("onCreate>>>>>>>", ">>>>UPGRADE");
         String sql = "CREATE TABLE STUDENT " +
                 "(id INTEGER PRIMARY KEY, " +
                 "name TEXT NOT NULL, " +
                 "andress TEXT, " +
                 "fone TEXT, " +
                 "site TEXT, " +
-                "assessment REAL);";
+                "assessment REAL, " +
+                "path_photo TEXT);";
         sqLiteDatabase.execSQL(sql);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-        String sql = "DROP TABLE IF EXISTS Schedule";
-        sqLiteDatabase.execSQL(sql);
-        onCreate(sqLiteDatabase);
+        Log.i("oldVersion>>>>",String.valueOf(i));
+        String sql = "";
+        switch (i) {
+            case 1:
+                sql = "ALTER TABLE STUDENT ADD COLUMN path_photo TEXT";
+                sqLiteDatabase.execSQL(sql); // indo para versao 2
+        }
+
     }
 
     public void insert(Student student) {
@@ -55,28 +63,9 @@ public class StudentDAO extends SQLiteOpenHelper{
         contentValues.put("fone", student.getFone());
         contentValues.put("site", student.getSite());
         contentValues.put("assessment", student.getAssessment());
+      //  Log.i("ContentValues>>>>", student.getPhoto());
+        contentValues.put("path_photo", student.getPhoto());
         return contentValues;
-    }
-
-    public List<Student> searchStudent() {
-        String sql = "SELECT * FROM STUDENT";
-        SQLiteDatabase sqLiteDatabase = getWritableDatabase();
-        Cursor c = sqLiteDatabase.rawQuery(sql,null);
-
-        List<Student> students = new ArrayList<>();
-        while(c.moveToNext()){
-            Student student = new Student();
-            student.setId(c.getLong(c.getColumnIndex("id")));
-            student.setName(c.getString(c.getColumnIndex("name")));
-            student.setAndress(c.getString(c.getColumnIndex("andress")));
-            student.setFone(c.getString(c.getColumnIndex("fone")));
-            student.setSite(c.getString(c.getColumnIndex("site")));
-            student.setAssessment(c.getDouble(c.getColumnIndex("assessment")));
-            students.add(student);
-        }
-        c.close();
-        sqLiteDatabase.close();
-        return students;
     }
 
     public List<Student> searchStudentFilter(String whatSearch) {
@@ -93,6 +82,7 @@ public class StudentDAO extends SQLiteOpenHelper{
             student.setFone(c.getString(c.getColumnIndex("fone")));
             student.setSite(c.getString(c.getColumnIndex("site")));
             student.setAssessment(c.getDouble(c.getColumnIndex("assessment")));
+            student.setPhoto(c.getString(c.getColumnIndex("path_photo")));
             students.add(student);
         }
         c.close();

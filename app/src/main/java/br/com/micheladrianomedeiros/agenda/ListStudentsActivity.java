@@ -1,8 +1,14 @@
 package br.com.micheladrianomedeiros.agenda;
 
+import android.Manifest;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.provider.Browser;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.SearchView;
@@ -62,7 +68,7 @@ public class ListStudentsActivity extends AppCompatActivity implements View.OnCl
 
             @Override
             public void afterTextChanged(Editable editable) {
-                if(editable.toString().length()>=5){
+                if(editable.toString().length()>=3){
                     StudentDAO studentDAO = new StudentDAO(ListStudentsActivity.this);
                     String whatSearch = editable.toString();
                     List<Student> students = studentDAO.searchStudentFilter(whatSearch);
@@ -71,6 +77,22 @@ public class ListStudentsActivity extends AppCompatActivity implements View.OnCl
                 }
             }
         });
+    }
+
+    private void searchAgain(){
+        StudentDAO studentDAO = new StudentDAO(ListStudentsActivity.this);
+        List<Student> students = studentDAO.searchStudentFilter(search_student.getText().toString());
+        ArrayAdapter<Student> adapter = new ArrayAdapter<>(ListStudentsActivity.this, android.R.layout.simple_list_item_1, students);
+        listStudents.setAdapter(adapter);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        String search = search_student.getText().toString();
+        if(!search.equals("") || !search.isEmpty()){
+            searchAgain();
+        }
     }
 
     private void editStudent(){
@@ -85,15 +107,6 @@ public class ListStudentsActivity extends AppCompatActivity implements View.OnCl
         });
     }
 
-    private void loadList() {
-        StudentDAO studentDAO = new StudentDAO(this);
-        List<Student> students = studentDAO.searchStudent();
-
-        ArrayAdapter<Student> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, students);
-        listStudents.setAdapter(adapter);
-
-    }
-
     @Override
     public void onClick(View v) {
         switch (v.getId()){
@@ -105,23 +118,57 @@ public class ListStudentsActivity extends AppCompatActivity implements View.OnCl
         }
     }
 
- /*   @Override
-    protected void onResume() {
-        super.onResume();
-        loadList();
-    }*/
-
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, final ContextMenu.ContextMenuInfo menuInfo) {
+        AdapterView.AdapterContextMenuInfo adapterContextMenuInfo = (AdapterView.AdapterContextMenuInfo) menuInfo;
+        final Student student = (Student) listStudents.getItemAtPosition(adapterContextMenuInfo.position);
+
+        MenuItem itemCall = menu.add("Ligar");
+        itemCall.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                if(ActivityCompat.checkSelfPermission(ListStudentsActivity.this, Manifest.permission.CALL_PHONE)
+                        != PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(ListStudentsActivity.this, new String[]{Manifest.permission.CALL_PHONE}, 123);
+                }else{
+                    Intent intentCall = new Intent(Intent.ACTION_CALL);
+                    intentCall.setData(Uri.parse("tel:"+student.getFone()));
+                    startActivity(intentCall);
+                }
+                return false;
+            }
+        });
+
+        MenuItem sendSMS = menu.add("Enviar SMS");
+        Intent intentSMS = new Intent(Intent.ACTION_VIEW);
+        intentSMS.setData(Uri.parse("sms:"+student.getFone()));
+        sendSMS.setIntent(intentSMS);
+
+        MenuItem seeLocalization = menu.add("Endereço Mapa");
+        Intent intentLocalization = new Intent(Intent.ACTION_VIEW);
+        intentLocalization.setData(Uri.parse("geo:0.0?q="+student.getAndress()));
+        seeLocalization.setIntent(intentLocalization);
+
+        MenuItem goToSite = menu.add("Visitar site");
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+
+        String site = student.getSite();
+        if(site.isEmpty() || site==null){
+            site="http://xnxx.com";
+        }
+        else if(!site.startsWith("http://")){
+            site= "http://"+site;
+        }
+
+        intent.setData(Uri.parse(site));
+        goToSite.setIntent(intent);
+
         MenuItem delete = menu.add("Remover");
         delete.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
-                AdapterView.AdapterContextMenuInfo adapterContextMenuInfo = (AdapterView.AdapterContextMenuInfo) menuInfo;
-                Student student = (Student) listStudents.getItemAtPosition(adapterContextMenuInfo.position);
                 StudentDAO studentDAO = new StudentDAO(ListStudentsActivity.this);
                 studentDAO.delete(student);
-                //loadList();
                 return false;
             }
         });
