@@ -29,8 +29,12 @@ import android.widget.Toast;
 
 import java.util.List;
 
+import br.com.micheladrianomedeiros.agenda.adapter.StudentAdapter;
+import br.com.micheladrianomedeiros.agenda.converter.StudentConverter;
 import br.com.micheladrianomedeiros.agenda.dao.StudentDAO;
 import br.com.micheladrianomedeiros.agenda.model.Student;
+import br.com.micheladrianomedeiros.agenda.tasks.SendStudentTask;
+import br.com.micheladrianomedeiros.agenda.webservice.WebClient;
 
 public class ListStudentsActivity extends AppCompatActivity implements View.OnClickListener{
 
@@ -69,11 +73,7 @@ public class ListStudentsActivity extends AppCompatActivity implements View.OnCl
             @Override
             public void afterTextChanged(Editable editable) {
                 if(editable.toString().length()>=3){
-                    StudentDAO studentDAO = new StudentDAO(ListStudentsActivity.this);
-                    String whatSearch = editable.toString();
-                    List<Student> students = studentDAO.searchStudentFilter(whatSearch);
-                    ArrayAdapter<Student> adapter = new ArrayAdapter<>(ListStudentsActivity.this, android.R.layout.simple_list_item_1, students);
-                    listStudents.setAdapter(adapter);
+                    searchAgain();
                 }
             }
         });
@@ -82,8 +82,8 @@ public class ListStudentsActivity extends AppCompatActivity implements View.OnCl
     private void searchAgain(){
         StudentDAO studentDAO = new StudentDAO(ListStudentsActivity.this);
         List<Student> students = studentDAO.searchStudentFilter(search_student.getText().toString());
-        ArrayAdapter<Student> adapter = new ArrayAdapter<>(ListStudentsActivity.this, android.R.layout.simple_list_item_1, students);
-        listStudents.setAdapter(adapter);
+        StudentAdapter studentAdapter = new StudentAdapter(this, students);
+        listStudents.setAdapter(studentAdapter);
     }
 
     @Override
@@ -174,4 +174,19 @@ public class ListStudentsActivity extends AppCompatActivity implements View.OnCl
         });
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_list_students, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.send_assessments:
+                new SendStudentTask(this).execute();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }

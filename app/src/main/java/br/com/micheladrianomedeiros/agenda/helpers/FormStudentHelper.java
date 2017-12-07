@@ -56,9 +56,7 @@ public class FormStudentHelper {
     }
 
     public void loadImage(String pathPhoto) {
-        //Log.i("loadImage>>>>>>>>>>>> ", String.valueOf(pathPhoto));
         if(pathPhoto!=null){
-           // Log.i("loadImage ","EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
             Bitmap bitmap = BitmapFactory.decodeFile(pathPhoto);
             Bitmap bitmapMinor = Bitmap.createScaledBitmap(bitmap, 300,300,true);
             no_photo.setImageBitmap(bitmapMinor);

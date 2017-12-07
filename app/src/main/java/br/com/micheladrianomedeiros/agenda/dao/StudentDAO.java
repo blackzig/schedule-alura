@@ -63,13 +63,34 @@ public class StudentDAO extends SQLiteOpenHelper{
         contentValues.put("fone", student.getFone());
         contentValues.put("site", student.getSite());
         contentValues.put("assessment", student.getAssessment());
-      //  Log.i("ContentValues>>>>", student.getPhoto());
         contentValues.put("path_photo", student.getPhoto());
         return contentValues;
     }
 
     public List<Student> searchStudentFilter(String whatSearch) {
         String sql = "SELECT * FROM STUDENT where name like '%"+whatSearch+"%'";
+        SQLiteDatabase sqLiteDatabase = getWritableDatabase();
+        Cursor c = sqLiteDatabase.rawQuery(sql,null);
+
+        List<Student> students = new ArrayList<>();
+        while(c.moveToNext()){
+            Student student = new Student();
+            student.setId(c.getLong(c.getColumnIndex("id")));
+            student.setName(c.getString(c.getColumnIndex("name")));
+            student.setAndress(c.getString(c.getColumnIndex("andress")));
+            student.setFone(c.getString(c.getColumnIndex("fone")));
+            student.setSite(c.getString(c.getColumnIndex("site")));
+            student.setAssessment(c.getDouble(c.getColumnIndex("assessment")));
+            student.setPhoto(c.getString(c.getColumnIndex("path_photo")));
+            students.add(student);
+        }
+        c.close();
+        sqLiteDatabase.close();
+        return students;
+    }
+
+    public List<Student> allStudent() {
+        String sql = "SELECT * FROM STUDENT";
         SQLiteDatabase sqLiteDatabase = getWritableDatabase();
         Cursor c = sqLiteDatabase.rawQuery(sql,null);
 
@@ -102,5 +123,17 @@ public class StudentDAO extends SQLiteOpenHelper{
         ContentValues contentValues = dataFromFields(student);
         String[] params = {student.getId().toString()};
         db.update("STUDENT", contentValues, "id=?", params);
+        db.close();
     }
+
+    public boolean isStudent(String fone){
+        SQLiteDatabase sqLiteDatabase = getWritableDatabase();
+        String sql = "SELECT * FROM STUDENT WHERE fone = ?";
+        Cursor c = sqLiteDatabase.rawQuery(sql, new String[]{fone});
+        int result = c.getCount();
+        c.close();
+        sqLiteDatabase.close();
+        return result>0;
+    }
+
 }
