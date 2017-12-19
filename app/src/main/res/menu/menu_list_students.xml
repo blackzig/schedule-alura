@@ -5,4 +5,10 @@
         android:title="Enviar Nota"
         android:icon="@drawable/sendassessment"
         app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/download_exams"
+        android:title="Baixar Provas"
+        android:icon="@drawable/download128"
+        app:showAsAction="always"/>
 </menu>

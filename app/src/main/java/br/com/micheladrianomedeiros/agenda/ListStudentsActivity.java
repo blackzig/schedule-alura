@@ -186,6 +186,10 @@ public class ListStudentsActivity extends AppCompatActivity implements View.OnCl
             case R.id.send_assessments:
                 new SendStudentTask(this).execute();
                 break;
+            case R.id.download_exams:
+                Intent i = new Intent(this, ExamActivity.class);
+                startActivity(i);
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
